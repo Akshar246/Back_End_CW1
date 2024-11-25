@@ -3,8 +3,7 @@ const router = express.Router();
 
 router.get("/search", async (req, res) => {
   try {
-    const { name, location, minPrice, maxPrice, minSpaces, maxSpaces } =
-      req.query;
+    const { name, location, price, spaces } = req.query;
 
     const query = {};
 
@@ -16,40 +15,31 @@ router.get("/search", async (req, res) => {
       query.location = { $regex: new RegExp(location, "i") };
     }
 
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) {
-        query.price.$gte = parseFloat(minPrice);
-      }
-      if (maxPrice) {
-        query.price.$lte = parseFloat(maxPrice);
+    if (price) {
+      const parsedPrice = parseFloat(price); // Parse price from query
+      if (!isNaN(parsedPrice)) {
+        query.price = { $regex: new RegExp(`^\\D*${parsedPrice}\\D*$`, "i") };
       }
     }
 
-    // Search by available spaces range
-    if (minSpaces || maxSpaces) {
-      query.availableSpaces = {};
-      if (minSpaces) {
-        query.availableSpaces.$gte = parseInt(minSpaces);
-      }
-      if (maxSpaces) {
-        query.availableSpaces.$lte = parseInt(maxSpaces);
-      }
+    // Search by exact spaces
+    if (spaces) {
+      query.availableSpaces = parseInt(spaces);
     }
 
-    // Fetch matching products from MongoDB
     const products = await req.app.locals.db
       .collection("products")
       .find(query)
       .toArray();
 
+    if (products.length === 0) {
+      return({ message: "No matching products found." });
+    }
+
     res.status(200).json(products);
   } catch (error) {
-    console.error("Error during search:", error);
     res.status(500).json({ error: "An error occurred while searching" });
   }
 });
-
-module.exports = router;
 
 module.exports = router;
