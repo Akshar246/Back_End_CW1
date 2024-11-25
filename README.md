@@ -29,7 +29,7 @@ This live version allows you to interact with the API endpoints directly and is 
 
 ### Installation
 1. Clone the Repository:
-- git clone https://github.com/yourusername/Back-End_CW1.git
+- git clone https://github.com/Akshar246/Back-End_CW1.git
 - cd Back-End_CW1
 
 2. Install Dependencies:
